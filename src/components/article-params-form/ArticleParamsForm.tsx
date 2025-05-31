@@ -1,4 +1,4 @@
-import { useState, FormEvent } from 'react';
+import { useRef, useState, FormEvent } from 'react';
 import { ArrowButton } from 'src/ui/arrow-button';
 import { Button } from 'src/ui/button';
 import { Text } from 'src/ui/text';
@@ -26,62 +26,65 @@ interface IArticleParamsFrom {
 }
 
 export const ArticleParamsForm = ({ onApplyFormData }: IArticleParamsFrom) => {
-	const [state, createState] = useState(defaultArticleState);
-	const { isOpen, onToggleModal } = useCloseModal();
+	const dialogRef = useRef<HTMLDivElement>(null);
+	const [articleParams, setArticleParams] = useState(defaultArticleState);
+
+	const { isOpen, onToggleModal } = useCloseModal(dialogRef);
 
 	const onChange = (options: OptionType, optionName: ArticleStateKey) =>
-		createState((prevState) => ({
+		setArticleParams((prevState) => ({
 			...prevState,
 			[optionName]: options,
 		}));
 
 	const onReset = () => {
-		createState(defaultArticleState);
+		setArticleParams(defaultArticleState);
 		onApplyFormData(defaultArticleState);
 	};
 
 	const onSubmit = (e: FormEvent<HTMLFormElement>) => {
 		e.preventDefault();
-		onApplyFormData(state);
+		onApplyFormData(articleParams);
 	};
 
 	return (
 		<>
 			<ArrowButton isOpen={isOpen} onClick={onToggleModal} />
 			<aside
+				ref={dialogRef}
 				className={clsx(styles.container, { [styles.container_open]: isOpen })}>
 				<form className={styles.form} onReset={onReset} onSubmit={onSubmit}>
 					<Text as='h2' size={31} weight={800} uppercase dynamicLite>
 						Задайте параметры
 					</Text>
 					<Select
-						selected={state.fontFamilyOption}
+						selected={articleParams.fontFamilyOption}
 						onChange={(options) => onChange(options, 'fontFamilyOption')}
 						options={fontFamilyOptions}
 						title='Шрифт'
 					/>
 					<RadioGroup
-						selected={state.fontSizeOption}
+						selected={articleParams.fontSizeOption}
 						name='radio'
 						onChange={(options) => onChange(options, 'fontSizeOption')}
 						options={fontSizeOptions}
 						title='Размер шрифта'
 					/>
 					<Select
-						selected={state.fontColor}
+						selected={articleParams.fontColor}
 						onChange={(options) => onChange(options, 'fontColor')}
 						options={fontColors}
 						title='Цвет шрифта'
 					/>
 					<Separator />
 					<Select
-						selected={state.backgroundColor}
+						selected={articleParams.backgroundColor}
 						onChange={(options) => onChange(options, 'backgroundColor')}
 						options={backgroundColors}
 						title='Цвет фона'
 					/>
 					<Select
-						selected={state.contentWidth}
+						selected={articleParams.contentWidth}
 						onChange={(options) => onChange(options, 'contentWidth')}
 						options={contentWidthArr}
 						title='Ширина контента'
